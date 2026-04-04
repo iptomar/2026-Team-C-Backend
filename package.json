@@ -1,0 +1,29 @@
+{
+  "name": "2026-team-c-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iptomar/2026-Team-C-Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/iptomar/2026-Team-C-Backend/issues"
+  },
+  "homepage": "https://github.com/iptomar/2026-Team-C-Backend#readme",
+  "dependencies": {
+    "@prisma/client": "^7.6.0",
+    "bcrypt": "^6.0.0",
+    "prisma": "^7.6.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}
