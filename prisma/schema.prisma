@@ -27,4 +27,32 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
+  forms Form[]
+  formsDatas FormsData[]
+}
+
+model Form{
+  id        Int      @id @default(autoincrement())
+  name      String
+  html      String
+  css       String
+  createdAt DateTime @default(now())
+  
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id])
+
+  @@map("forms")
+  formsDatas FormsData[]
+}
+
+model FormsData{
+  id        Int      @id @default(autoincrement())
+  data      Json
+  createdAt DateTime @default(now())
+  formId    Int
+  form      Form     @relation(fields: [formId], references: [id])
+  madeById  Int
+  madeBy    User @relation(fields: [madeById], references: [id])
+
+  @@map("forms_data")
 }
