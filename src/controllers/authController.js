@@ -1,5 +1,5 @@
 const { loginUser } = require('../auth/authService');
-const { addToBlacklist } = require('../auth/blacklist.js');
+const { addToBlacklist } = require('../auth/blacklist');
 const jwt = require('jsonwebtoken');
 
 async function login(req, res) {
@@ -16,13 +16,7 @@ async function login(req, res) {
 }
 
 async function logout(req, res) {
-  const token = req.headers['authorization']?.split(' ')[1];
-
-  if (!token) {
-    return res.status(400).json({ message: 'Token em falta' });
-  }
-
-  addToBlacklist(token);
+  addToBlacklist(req.token);
   return res.json({ message: 'Logout realizado com sucesso' });
 }
 
