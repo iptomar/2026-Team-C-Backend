@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/iptomar/2026-Team-C-Backend#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.6.0",
     "bcrypt": "^6.0.0",
     "express": "^5.2.1",

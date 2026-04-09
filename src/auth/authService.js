@@ -1,7 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const { hashPassword, comparePassword } = require('./password');
+const { PrismaPg } = require('@prisma/adapter-pg')
+require('dotenv').config()
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const prisma = new PrismaClient({ adapter })
 
 // Registo de utilizador - guarda a password como hash
 async function registerUser(email, plainPassword) {
@@ -11,6 +14,8 @@ async function registerUser(email, plainPassword) {
     data: {
       email,
       password: hashedPassword,
+      name,
+      role,
     },
   });
 

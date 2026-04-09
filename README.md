@@ -16,12 +16,17 @@ npm install
 ```
 
 ### 2. Variáveis de ambiente
-
 Cria um ficheiro `.env` na raiz do projeto:
-
 ```env
 DATABASE_URL="postgresql://gp:gp@localhost:5432/gp"
+JWT_SECRET="um_segredo_muito_secreto"
 ```
+
+Para gerar um JWT_SECRET seguro com openssl:
+```bash
+openssl rand -base64 32
+```
+Copia o output e cola no `JWT_SECRET` do `.env`.
 
 ### 3. Base de dados (Docker)
 
@@ -59,4 +64,3 @@ Sempre que o schema for alterado, corre:
 ```bash
 npx prisma migrate dev --name 
 ```
-
