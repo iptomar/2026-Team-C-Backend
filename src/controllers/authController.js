@@ -1,4 +1,5 @@
 const { loginUser } = require('../auth/authService');
+const { addToBlacklist } = require('../auth/blacklist');
 const jwt = require('jsonwebtoken');
 
 async function login(req, res) {
@@ -14,8 +15,13 @@ async function login(req, res) {
   });
 }
 
+async function logout(req, res) {
+  addToBlacklist(req.token, req.user.exp);
+  return res.json({ message: 'Logout realizado com sucesso' });
+}
 
-module.exports = { login };
+
+module.exports = { login, logout };
 
 
 
