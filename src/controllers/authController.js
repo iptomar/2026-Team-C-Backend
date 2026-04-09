@@ -16,7 +16,7 @@ async function login(req, res) {
 }
 
 async function logout(req, res) {
-  addToBlacklist(req.token);
+  addToBlacklist(req.token, req.user.exp);
   return res.json({ message: 'Logout realizado com sucesso' });
 }
 
