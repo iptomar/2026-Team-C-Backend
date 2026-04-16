@@ -1,5 +1,11 @@
 # 2026-Team-C-Backend
 
+## Nota Importante
+Os principais responsáveis pelo backend são Daniel Paulo e Gonçalo Serrano.
+
+Todas as alterações ao backend devem ser feitas em branches próprias.
+Cada merge deve ser realizado através de pull request e requer aprovação, via code review, de pelo menos um dos responsáveis.
+
 ## Pré-requisitos
 
 - Node.js v18+
