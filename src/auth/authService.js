@@ -7,7 +7,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 // Registo de utilizador - guarda a password como hash
-async function registerUser(email, plainPassword) {
+async function registerUser(name, email, plainPassword) {
   const hashedPassword = await hashPassword(plainPassword);
 
   const user = await prisma.user.create({
@@ -15,7 +15,7 @@ async function registerUser(email, plainPassword) {
       email,
       password: hashedPassword,
       name,
-      role,
+      role: 'USER'
     },
   });
 
@@ -24,8 +24,8 @@ async function registerUser(email, plainPassword) {
 
 // Login - compara a password introduzida com o hash na BD
 async function loginUser(email, plainPassword) {
-  const user = await prisma.user.findUnique({
-    where: { email },
+  const user = await prisma.user.findFirst({
+    where: { email: email },
   });
 
   if (!user) {
