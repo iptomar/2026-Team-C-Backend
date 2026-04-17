@@ -22,6 +22,8 @@ function isStrongPassword(password) {
 
 async function register(req, res) {
   try {
+    console.log('BODY RECEBIDO:', req.body);
+
     const { name, email, password } = req.body;
 
     const cleanName = name ? name.trim() : '';
@@ -61,7 +63,7 @@ async function register(req, res) {
 
     const user = await registerUser(cleanName, cleanEmail, cleanPassword);
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Utilizador registado com sucesso',
       user: {
         id: user.id,
@@ -71,30 +73,46 @@ async function register(req, res) {
       },
     });
   } catch (error) {
+    console.error('ERRO NO REGISTER:', error);
     return res.status(500).json({ error: 'Erro interno no servidor.' });
   }
 }
 
 async function login(req, res) {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await loginUser(email, password);
+    const user = await loginUser(email, password);
 
-  const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '8h' }
-  );
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
 
-  res.json({
-    token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role }
-  });
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('ERRO NO LOGIN:', error);
+    return res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 }
 
 async function logout(req, res) {
-  addToBlacklist(req.token, req.user.exp);
-  return res.json({ message: 'Logout realizado com sucesso' });
+  try {
+    addToBlacklist(req.token, req.user.exp);
+    return res.json({ message: 'Logout realizado com sucesso' });
+  } catch (error) {
+    console.error('ERRO NO LOGOUT:', error);
+    return res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 }
 
 module.exports = { register, login, logout };
