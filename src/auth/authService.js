@@ -1,41 +1,69 @@
 const { PrismaClient } = require('@prisma/client');
 const { hashPassword, comparePassword } = require('./password');
-const { PrismaPg } = require('@prisma/adapter-pg')
-require('dotenv').config()
+const { PrismaPg } = require('@prisma/adapter-pg');
+require('dotenv').config();
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
-const prisma = new PrismaClient({ adapter })
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
-// Registo de utilizador - guarda a password como hash
+function createError(message, statusCode = 400) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+// Registo de utilizador
 async function registerUser(name, email, plainPassword) {
-  const hashedPassword = await hashPassword(plainPassword);
+  const cleanName = name ? name.trim() : '';
+  const cleanEmail = email ? email.trim().toLowerCase() : '';
+  const cleanPassword = plainPassword || '';
+
+  const nameExist = await prisma.user.findFirst({
+    where: { name: cleanName },
+  });
+
+  if (nameExist) {
+    throw createError('Nome já existe');
+  }
+
+  const emailExist = await prisma.user.findFirst({
+    where: { email: cleanEmail },
+  });
+
+  if (emailExist) {
+    throw createError('Email já existe');
+  }
+
+  const hashedPassword = await hashPassword(cleanPassword);
 
   const user = await prisma.user.create({
     data: {
-      email,
+      email: cleanEmail,
       password: hashedPassword,
-      name,
-      role: 'USER'
+      name: cleanName,
+      role: 'USER',
     },
   });
 
   return user;
 }
 
-// Login - compara a password introduzida com o hash na BD
+// Login
 async function loginUser(email, plainPassword) {
+  const cleanEmail = email ? email.trim().toLowerCase() : '';
+
   const user = await prisma.user.findFirst({
-    where: { email: email },
+    where: { email: cleanEmail },
   });
 
   if (!user) {
-    throw new Error('Utilizador não encontrado');
+    throw createError('Utilizador não encontrado', 404);
   }
 
   const isValid = await comparePassword(plainPassword, user.password);
 
   if (!isValid) {
-    throw new Error('Password incorreta');
+    throw createError('Password incorreta', 401);
   }
 
   return user;
