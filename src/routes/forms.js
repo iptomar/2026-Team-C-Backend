@@ -95,8 +95,8 @@ router.delete('/forms/:id', async (req, res) => {
   }
 });
 
-// POST /api/forms/:id/archive
-router.post('/forms/:id/archive', async (req, res) => {
+// PATCH /api/forms/:id/archive
+router.patch('/forms/:id/archive', async (req, res) => {
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
@@ -111,8 +111,8 @@ router.post('/forms/:id/archive', async (req, res) => {
   }
 });
 
-// POST /api/forms/:id/unarchive
-router.post('/forms/:id/unarchive', async (req, res) => {
+// PATCH /api/forms/:id/unarchive
+router.patch('/forms/:id/unarchive', async (req, res) => {
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
