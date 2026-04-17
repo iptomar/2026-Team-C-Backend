@@ -17,7 +17,7 @@ router.post('/forms', async (req, res) => {
 
   try {
     const novoFormulario = await prisma.form.create({
-      data: { name, html, css, ownerId: parseInt(ownerId) }
+      data: { name, html, css, ownerId: parseInt(ownerId), archived: false } 
     });
     return res.status(201).json(novoFormulario);
   } catch (err) {
@@ -28,7 +28,14 @@ router.post('/forms', async (req, res) => {
 // GET /api/forms
 router.get('/forms', async (req, res) => {
   try {
+    const { archived } = req.query;
+
+    const where = archived !== undefined
+      ? { archived: archived === 'true' }
+      : {};
+
     const formularios = await prisma.form.findMany({
+      where,
       include: { owner: { select: { id: true, name: true, email: true } } }
     });
     return res.status(200).json(formularios);
@@ -63,6 +70,53 @@ router.put('/forms/:id', async (req, res) => {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
       data: { name, html, css }
+    });
+    return res.status(200).json(formulario);
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ erro: 'Formulário não encontrado' });
+    }
+    return res.status(500).json({ erro: err.message });
+  }
+});
+
+// DELETE /api/forms/:id
+router.delete('/forms/:id', async (req, res) => {
+  try {
+    await prisma.form.delete({
+      where: { id: parseInt(req.params.id) }
+    });
+    return res.status(200).json({ mensagem: 'Formulário eliminado com sucesso' });
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ erro: 'Formulário não encontrado' });
+    }
+    return res.status(500).json({ erro: err.message });
+  }
+});
+
+// PATCH /api/forms/:id/archive
+router.patch('/forms/:id/archive', async (req, res) => {
+  try {
+    const formulario = await prisma.form.update({
+      where: { id: parseInt(req.params.id) },
+      data: { archived: true }
+    });
+    return res.status(200).json(formulario);
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ erro: 'Formulário não encontrado' });
+    }
+    return res.status(500).json({ erro: err.message });
+  }
+});
+
+// PATCH /api/forms/:id/unarchive
+router.patch('/forms/:id/unarchive', async (req, res) => {
+  try {
+    const formulario = await prisma.form.update({
+      where: { id: parseInt(req.params.id) },
+      data: { archived: false }
     });
     return res.status(200).json(formulario);
   } catch (err) {
