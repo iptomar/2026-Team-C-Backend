@@ -1,4 +1,5 @@
 const { registerUser, loginUser } = require('../auth/authService');
+const { sendEmail } = require('../email/transporter');
 const { addToBlacklist } = require('../auth/blacklist');
 const jwt = require('jsonwebtoken');
 
@@ -70,6 +71,12 @@ async function register(req, res) {
         role: user.role,
       },
     });
+
+    sendEmail(
+      cleanEmail,
+      'Bem-vindo ao Lusobites!',
+      `Olá ${cleanName},\n\nObrigado por se registar no Lusobites! Estamos entusiasmados em tê-lo conosco. Explore nossos deliciosos pratos e aproveite a experiência gastronômica.\n\nAtenciosamente,\nEquipe Lusobites`
+    );
   } catch (error) {
     return res.status(500).json({ error: 'Erro interno no servidor.' });
   }
