@@ -1,13 +1,42 @@
 const { registerUser, loginUser } = require('../auth/authService');
 const { sendEmail } = require('../email/transporter');
 const { addToBlacklist } = require('../auth/blacklist');
+const { resetPassword, generateLinkforResetPassword } = require('../auth/passwordreset');
 const jwt = require('jsonwebtoken');
+
+
+async function generateResetLink(req, res) {
+  try {
+    const email = req.body.email;
+    await generateLinkforResetPassword(email);
+    return res.json({ message: 'Link para reset de password enviado com sucesso' });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+}
+
+async function resetUserPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+    await resetPassword(token, newPassword);
+    return res.json({ message: 'Password atualizada com sucesso' });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+}
+
 
 async function register(req, res) {
   try {
     const { name, email, password } = req.body;
 
     const user = await registerUser(name, email, password);
+    
+    sendEmail(
+      cleanEmail,
+      'Bem-vindo ao Lusobites!',
+      `Olá ${cleanName},\n\nObrigado por se registar no Lusobites! Estamos entusiasmados em tê-lo conosco. Explore nossos deliciosos pratos e aproveite a experiência gastronômica.\n\nAtenciosamente,\nEquipe Lusobites`
+    );
 
     return res.status(201).json({
       message: 'Utilizador registado com sucesso',
@@ -19,11 +48,7 @@ async function register(req, res) {
       },
     });
 
-    sendEmail(
-      cleanEmail,
-      'Bem-vindo ao Lusobites!',
-      `Olá ${cleanName},\n\nObrigado por se registar no Lusobites! Estamos entusiasmados em tê-lo conosco. Explore nossos deliciosos pratos e aproveite a experiência gastronômica.\n\nAtenciosamente,\nEquipe Lusobites`
-    );
+
   } catch (error) {
     console.error('ERRO NO REGISTER:', error);
 
@@ -73,4 +98,4 @@ async function logout(req, res) {
   }
 }
 
-module.exports = { register, login, logout };
+module.exports = { register, login, logout, generateResetLink, resetUserPassword };

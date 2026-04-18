@@ -29,6 +29,7 @@ model User {
   @@map("users")
   forms Form[]
   formsDatas FormsData[]
+  passwordResetTokens PasswordResetToken?
 }
 
 model Form{
@@ -56,4 +57,14 @@ model FormsData{
   madeBy    User @relation(fields: [madeById], references: [id])
 
   @@map("forms_data")
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int  @unique
+  expiresAt DateTime @default(dbgenerated("NOW() + INTERVAL '15 minutes'"))
+
+  @@map("password_reset_tokens")
 }
