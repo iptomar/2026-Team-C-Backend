@@ -83,7 +83,7 @@ async function changePassword(userId, currentPassword, newPassword) {
   });
 
   if (!user) {
-    throw createError("Utilizador não encontrado");
+    throw createError("Utilizador não encontrado", 404);
   }
 
   const isValid = await comparePassword(currentPassword, user.password);
