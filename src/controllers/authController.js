@@ -1,4 +1,4 @@
-const { registerUser, loginUser } = require('../auth/authService');
+const { registerUser, loginUser, changePassword } = require('../auth/authService');
 const { sendEmail } = require('../email/transporter');
 const { addToBlacklist } = require('../auth/blacklist');
 const { resetPassword, generateLinkforResetPassword } = require('../auth/passwordreset');
@@ -31,7 +31,7 @@ async function register(req, res) {
     const { name, email, password } = req.body;
 
     const user = await registerUser(name, email, password);
-    
+
     sendEmail(
       cleanEmail,
       'Bem-vindo ao Lusobites!',
@@ -98,4 +98,15 @@ async function logout(req, res) {
   }
 }
 
-module.exports = { register, login, logout, generateResetLink, resetUserPassword };
+async function changeUserPassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    await changePassword(req.user.userId, currentPassword, newPassword);
+    addToBlacklist(req.token, req.user.exp);
+    return res.json({ message: 'Password alterada com sucesso. Faça login novamente.' });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message || 'Erro ao alterar password.' });
+  }
+}
+
+module.exports = { register, login, logout, generateResetLink, resetUserPassword, changeUserPassword };

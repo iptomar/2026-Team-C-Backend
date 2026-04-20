@@ -69,4 +69,35 @@ async function loginUser(email, plainPassword) {
   return user;
 }
 
-module.exports = { registerUser, loginUser };
+async function changePassword(userId, currentPassword, newPassword) {
+  if (!currentPassword || !newPassword) {
+    throw createError('Passwords não podem estar vazias');
+  }
+
+  if (currentPassword === newPassword) {
+    throw createError('A nova password deve ser diferente da atual');
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(userId) },
+  });
+
+  if (!user) {
+    throw createError("Utilizador não encontrado");
+  }
+
+  const isValid = await comparePassword(currentPassword, user.password);
+
+  if (!isValid) {
+    throw createError('Password atual incorreta', 401);
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  await prisma.user.update({
+    where: { id: parseInt(userId) },
+    data: { password: hashedPassword },
+  });
+}
+
+module.exports = { registerUser, loginUser, changePassword };
