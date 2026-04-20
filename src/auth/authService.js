@@ -71,7 +71,7 @@ async function loginUser(email, plainPassword) {
 
 async function changePassword(userId, currentPassword, newPassword) {
   if (!currentPassword || !newPassword) {
-    throw createError('Passwords não podem estar vazias');
+    throw createError('As passwords não podem estar vazias');
   }
 
   if (currentPassword === newPassword) {
