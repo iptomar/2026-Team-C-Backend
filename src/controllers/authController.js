@@ -33,9 +33,9 @@ async function register(req, res) {
     const user = await registerUser(name, email, password);
 
     sendEmail(
-      cleanEmail,
+      email,
       'Bem-vindo ao Lusobites!',
-      `Olá ${cleanName},\n\nObrigado por se registar no Lusobites! Estamos entusiasmados em tê-lo conosco. Explore nossos deliciosos pratos e aproveite a experiência gastronômica.\n\nAtenciosamente,\nEquipe Lusobites`
+      `Olá ${email},\n\nObrigado por se registar no Lusobites! Estamos entusiasmados em tê-lo conosco. Explore nossos deliciosos pratos e aproveite a experiência gastronômica.\n\nAtenciosamente,\nEquipe Lusobites`
     );
 
     return res.status(201).json({
