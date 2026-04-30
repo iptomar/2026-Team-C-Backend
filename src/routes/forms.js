@@ -127,4 +127,30 @@ router.patch('/forms/:id/unarchive', async (req, res) => {
   }
 });
 
+// POST /api/forms/preview
+router.post('/forms/preview', (req, res) => {
+  const { html, css } = req.body;
+
+  if (!html || !css) {
+    return res.status(404).json({ erro: 'html e css são obrigatórios' });
+  }
+
+  const paginaCompleta = `
+    <!DOCTYPE html>
+    <html lang="pt">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>${css}</style>
+      </head>
+      <body>
+        ${html}
+      </body>
+    </html>
+  `;
+
+  res.setHeader('Content-Type', 'text/html');
+  return res.status(200).send(paginaCompleta);
+});
+
 module.exports = router;
