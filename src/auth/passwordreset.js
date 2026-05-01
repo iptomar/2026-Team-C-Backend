@@ -66,7 +66,7 @@ async function generateLinkforResetPassword(email) {
     console.log("TOKEN GERADO E SALVO:", token);
 
     const ourdomain = 'http://localhost:5173/';
-    const resetLink = `${ourdomain}reset-password?token=${token}`;
+    const resetLink = `${ourdomain}passwd/${token}`;
 
 
 
