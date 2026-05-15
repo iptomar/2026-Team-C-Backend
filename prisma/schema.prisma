@@ -37,6 +37,7 @@ model Form{
   name      String
   html      String
   css       String
+  structure Json?
   archived  Boolean  @default(false)
   createdAt DateTime @default(now())
   
