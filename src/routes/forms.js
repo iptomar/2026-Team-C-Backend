@@ -7,6 +7,33 @@ require('dotenv').config();
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+// POST /api/forms/preview
+router.post('/forms/preview', (req, res) => {
+  const { html, css } = req.body;
+
+  if (!html || !css) {
+    return res.status(404).json({ erro: 'html e css são obrigatórios' });
+  }
+
+  const paginaCompleta = `
+    <!DOCTYPE html>
+    <html lang="pt">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>${css}</style>
+      </head>
+      <body>
+        ${html}
+      </body>
+    </html>
+  `;
+
+  res.setHeader('Content-Type', 'text/html');
+  return res.status(200).send(paginaCompleta);
+});
+
+
 // POST /api/forms
 router.post('/forms', async (req, res) => {
   const { name, html, css, ownerId } = req.body;
@@ -17,7 +44,7 @@ router.post('/forms', async (req, res) => {
 
   try {
     const novoFormulario = await prisma.form.create({
-      data: { name, html, css, ownerId: parseInt(ownerId), archived: false } 
+      data: { name, html, css, ownerId: parseInt(ownerId), archived: false }
     });
     return res.status(201).json(novoFormulario);
   } catch (err) {
@@ -127,30 +154,5 @@ router.patch('/forms/:id/unarchive', async (req, res) => {
   }
 });
 
-// POST /api/forms/preview
-router.post('/forms/preview', (req, res) => {
-  const { html, css } = req.body;
-
-  if (!html || !css) {
-    return res.status(404).json({ erro: 'html e css são obrigatórios' });
-  }
-
-  const paginaCompleta = `
-    <!DOCTYPE html>
-    <html lang="pt">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <style>${css}</style>
-      </head>
-      <body>
-        ${html}
-      </body>
-    </html>
-  `;
-
-  res.setHeader('Content-Type', 'text/html');
-  return res.status(200).send(paginaCompleta);
-});
 
 module.exports = router;
