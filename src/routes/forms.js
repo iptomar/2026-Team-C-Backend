@@ -8,7 +8,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 // POST /api/forms/preview
-router.post('/forms/preview', (req, res) => {
+router.post('/preview', (req, res) => {
   const { html, css } = req.body;
 
   if (!html || !css) {
@@ -34,7 +34,7 @@ router.post('/forms/preview', (req, res) => {
 });
 
 // POST /api/forms/:id/validate
-router.post('/forms/:id/validate', async (req, res) => {
+router.post('/:id/validate', async (req, res) => {
   const { data } = req.body;
 
   if (!data || typeof data !== 'object') {
@@ -50,7 +50,12 @@ router.post('/forms/:id/validate', async (req, res) => {
       return res.status(404).json({ erro: 'Formulário não encontrado' });
     }
 
-    const structure = formulario.structure;
+    let structure;
+    try {
+      structure = JSON.parse(formulario.css);
+    } catch {
+      return res.status(200).json({ valido: true, erros: {} });
+    }
 
     if (!structure || !structure.fields) {
       return res.status(200).json({ valido: true, erros: {} });
@@ -82,7 +87,7 @@ router.post('/forms/:id/validate', async (req, res) => {
 });
 
 // POST /api/forms/:id/submit
-router.post('/forms/:id/submit', async (req, res) => {
+router.post('/:id/submit', async (req, res) => {
   const { data, madeById } = req.body;
 
   if (!data || !madeById) {
@@ -102,7 +107,13 @@ router.post('/forms/:id/submit', async (req, res) => {
       return res.status(400).json({ erro: 'Este formulário está arquivado e não aceita submissões' });
     }
 
-    const structure = formulario.structure;
+    let structure;
+    try {
+      structure = JSON.parse(formulario.css);
+    } catch {
+      structure = null;
+    }
+
     if (structure && structure.fields) {
       const erros = {};
       let valido = true;
@@ -146,8 +157,8 @@ router.post('/forms/:id/submit', async (req, res) => {
 });
 
 // POST /api/forms
-router.post('/forms', async (req, res) => {
-  const { name, html, css, ownerId, structure } = req.body; // ✅ inclui structure
+router.post('/', async (req, res) => {
+  const { name, html, css, ownerId } = req.body;
 
   if (!name || !html || !css || !ownerId) {
     return res.status(400).json({ erro: 'name, html, css e ownerId são obrigatórios' });
@@ -161,7 +172,6 @@ router.post('/forms', async (req, res) => {
         css,
         ownerId: parseInt(ownerId),
         archived: false,
-        structure: structure ?? null, // ✅ guarda structure
       }
     });
     return res.status(201).json(novoFormulario);
@@ -171,7 +181,7 @@ router.post('/forms', async (req, res) => {
 });
 
 // GET /api/forms
-router.get('/forms', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { archived } = req.query;
 
@@ -191,7 +201,7 @@ router.get('/forms', async (req, res) => {
 });
 
 // GET /api/forms/:id
-router.get('/forms/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const formulario = await prisma.form.findUnique({
       where: { id: parseInt(req.params.id) },
@@ -209,13 +219,13 @@ router.get('/forms/:id', async (req, res) => {
 });
 
 // PUT /api/forms/:id
-router.put('/forms/:id', async (req, res) => {
-  const { name, html, css, structure } = req.body; // ✅ inclui structure
+router.put('/:id', async (req, res) => {
+  const { name, html, css } = req.body;
 
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
-      data: { name, html, css, structure: structure ?? undefined } // ✅ guarda structure
+      data: { name, html, css }
     });
     return res.status(200).json(formulario);
   } catch (err) {
@@ -227,7 +237,7 @@ router.put('/forms/:id', async (req, res) => {
 });
 
 // DELETE /api/forms/:id
-router.delete('/forms/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     await prisma.form.delete({
       where: { id: parseInt(req.params.id) }
@@ -242,7 +252,7 @@ router.delete('/forms/:id', async (req, res) => {
 });
 
 // PATCH /api/forms/:id/archive
-router.patch('/forms/:id/archive', async (req, res) => {
+router.patch('/:id/archive', async (req, res) => {
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
@@ -258,7 +268,7 @@ router.patch('/forms/:id/archive', async (req, res) => {
 });
 
 // PATCH /api/forms/:id/unarchive
-router.patch('/forms/:id/unarchive', async (req, res) => {
+router.patch('/:id/unarchive', async (req, res) => {
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
