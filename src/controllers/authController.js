@@ -61,17 +61,19 @@ async function register(req, res) {
 async function login(req, res) {
   try {
     const { email, password } = req.body;
-
     const user = await loginUser(email, password);
-
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
-
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 8 * 60 * 60 * 1000
+    });
     return res.json({
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -80,8 +82,6 @@ async function login(req, res) {
       },
     });
   } catch (error) {
-    console.error('ERRO NO LOGIN:', error);
-
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Erro ao fazer login.',
     });
@@ -91,11 +91,19 @@ async function login(req, res) {
 async function logout(req, res) {
   try {
     addToBlacklist(req.token, req.user.exp);
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
     return res.json({ message: 'Logout realizado com sucesso' });
   } catch (error) {
-    console.error('ERRO NO LOGOUT:', error);
     return res.status(500).json({ error: 'Erro interno no servidor.' });
   }
+}
+
+async function me(req, res) {
+  return res.json({ user: req.user });
 }
 
 async function changeUserPassword(req, res) {
@@ -109,4 +117,4 @@ async function changeUserPassword(req, res) {
   }
 }
 
-module.exports = { register, login, logout, generateResetLink, resetUserPassword, changeUserPassword };
+module.exports = { register, login, logout, generateResetLink, resetUserPassword, changeUserPassword, me };
