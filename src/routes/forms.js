@@ -181,19 +181,27 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/forms
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const { archived } = req.query;
+    const { role } = req.user;
 
-    const where = archived !== undefined
-      ? { archived: archived === 'true' }
-      : {};
+    let where = {};
+
+    if (role === 'admin') {
+      if (archived !== undefined) {
+        where.archived = archived === 'true';
+      }
+    } else {
+      where.archived = false;
+    }
 
     const formularios = await prisma.form.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       include: { owner: { select: { id: true, name: true, email: true } } }
     });
+
     return res.status(200).json(formularios);
   } catch (err) {
     return res.status(500).json({ erro: err.message });
