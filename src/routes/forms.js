@@ -35,8 +35,13 @@ router.post("/preview", (req, res) => {
 });
 
 // POST /api/forms
+<<<<<<< Updated upstream
 router.post("/", async (req, res) => {
   const { name, html, css, fields, ownerId } = req.body;
+=======
+router.post('/', async (req, res) => {
+  const { name, html, css, ownerId } = req.body;
+>>>>>>> Stashed changes
 
   if (!name || !html || !css || !ownerId) {
     return res.status(400).json({
@@ -66,6 +71,13 @@ router.post("/", async (req, res) => {
 // GET /api/forms
 router.get("/", async (req, res) => {
   try {
+<<<<<<< Updated upstream
+=======
+    const { role } = req.user;
+
+    const where = role !== 'ADMIN' ? { archived: false } : {};
+
+>>>>>>> Stashed changes
     const formularios = await prisma.form.findMany({
       orderBy: { createdAt: "desc" },
       include: {
@@ -185,8 +197,13 @@ router.get("/:id", async (req, res) => {
 });
 
 // PUT /api/forms/:id
+<<<<<<< Updated upstream
 router.put("/:id", async (req, res) => {
   const { name, html, css, fields } = req.body;
+=======
+router.put('/:id', async (req, res) => {
+  const { name, html, css } = req.body;
+>>>>>>> Stashed changes
 
   try {
     const formulario = await prisma.form.update({
@@ -203,12 +220,37 @@ router.put("/:id", async (req, res) => {
 
     return res.status(200).json(formulario);
   } catch (err) {
+<<<<<<< Updated upstream
+=======
+    if (err.code === 'P2025') {
+      return res.status(404).json({ erro: 'Formulário não encontrado' });
+    }
+    return res.status(500).json({ erro: err.message });
+  }
+});
+
+// DELETE /api/forms/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    await prisma.form.delete({
+      where: { id: parseInt(req.params.id) }
+    });
+    return res.status(200).json({ mensagem: 'Formulário eliminado com sucesso' });
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ erro: 'Formulário não encontrado' });
+    }
+>>>>>>> Stashed changes
     return res.status(500).json({ erro: err.message });
   }
 });
 
 // PATCH /api/forms/:id/archive
+<<<<<<< Updated upstream
 router.patch("/:id/archive", async (req, res) => {
+=======
+router.patch('/:id/archive', async (req, res) => {
+>>>>>>> Stashed changes
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
@@ -222,7 +264,11 @@ router.patch("/:id/archive", async (req, res) => {
 });
 
 // PATCH /api/forms/:id/unarchive
+<<<<<<< Updated upstream
 router.patch("/:id/unarchive", async (req, res) => {
+=======
+router.patch('/:id/unarchive', async (req, res) => {
+>>>>>>> Stashed changes
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
