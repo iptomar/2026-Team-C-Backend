@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
+const authMiddleware = require('../middleware/authMiddleware');
 require('dotenv').config();
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -157,7 +158,7 @@ router.post('/:id/submit', async (req, res) => {
 });
 
 // POST /api/forms
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   const { name, html, css, ownerId } = req.body;
 
   if (!name || !html || !css || !ownerId) {
@@ -181,7 +182,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/forms
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { archived } = req.query;
     const { role } = req.user;
@@ -189,10 +190,12 @@ router.get('/', authenticateToken, async (req, res) => {
     let where = {};
 
     if (role === 'admin') {
+      // Admin vê tudo — filtra por archived só se o query param for passado
       if (archived !== undefined) {
         where.archived = archived === 'true';
       }
     } else {
+      // Utilizador normal nunca vê arquivados
       where.archived = false;
     }
 
@@ -227,7 +230,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // PUT /api/forms/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   const { name, html, css } = req.body;
 
   try {
@@ -245,7 +248,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/forms/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     await prisma.form.delete({
       where: { id: parseInt(req.params.id) }
@@ -260,7 +263,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // PATCH /api/forms/:id/archive
-router.patch('/:id/archive', async (req, res) => {
+router.patch('/:id/archive', authMiddleware, async (req, res) => {
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
@@ -276,7 +279,7 @@ router.patch('/:id/archive', async (req, res) => {
 });
 
 // PATCH /api/forms/:id/unarchive
-router.patch('/:id/unarchive', async (req, res) => {
+router.patch('/:id/unarchive', authMiddleware, async (req, res) => {
   try {
     const formulario = await prisma.form.update({
       where: { id: parseInt(req.params.id) },
