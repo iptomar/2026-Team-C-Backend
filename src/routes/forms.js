@@ -189,7 +189,13 @@ router.get('/', authMiddleware, async (req, res) => {
 
     let where = {};
 
-    if (role === 'user') {
+    if (role === 'admin') {
+      // Admin vê tudo — filtra por archived só se o query param for passado
+      if (archived !== undefined) {
+        where.archived = archived === 'true';
+      }
+    } else {
+      // Utilizador normal nunca vê arquivados
       where.archived = false;
     }
 
