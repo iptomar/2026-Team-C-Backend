@@ -25,8 +25,8 @@ npm install
 Cria um ficheiro `.env` na raiz do projeto:
 ```env
 DATABASE_URL="postgresql://gp:gp@localhost:5432/gp"
-JWT_SECRET="GJO5Gbq2jKTBdKjJ31RILTiJtkyFKA3+K79toAl2Sxs="
-GOOGLE_APP_PASSWORD="wtgz vtey fgpm yenu"
+JWT_SECRET="
+GOOGLE_APP_PASSWORD=""
 ```
 
 Para gerar um JWT_SECRET seguro com openssl:
